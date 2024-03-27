@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quan li cua hang ban xang dau</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" /> 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+</head>
+<body>
+    <div class="row">
+        <div class="col-sm-8">
+            <div id="map"></div>
+        </div>
+        <div class="col-sm-4">
+            <form>
+                <h1>Thêm điểm bán lẻ</h1>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Tên điểm bán lẻ</label>
+                            <input
+                                class="form-control"
+                                type="text"
+                                id="ten_dbl"
+                                placeholder="Tên điểm bán lẻ"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Công ty</label>
+                            <select name="congty[]" id="ten_congty" class="custom-select col-12">
+                                
+                                <option value="">Chọn công ty</option>
+        
+                            </select>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Số điện thoại</label>
+                            <input
+                                class="form-control"
+                                type="text"
+                                id="sdt"
+                                placeholder="Số điện thoại"
+                            />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Địa chỉ</label>
+                            <input
+                                class="form-control"
+                                type="text"
+                                id="diachi"
+                                placeholder="Địa chỉ"
+                            />
+                        </div>
+                        
+                    </div>
+                </div>
+                   
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Vĩ độ</label>
+                            <input
+                                class="form-control"
+                                type="text"
+                                id="vido"
+                                name="vido"
+                                placeholder="Vĩ độ"
+                            />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Kinh độ</label>
+                            <input
+                                class="form-control"
+                                type="text"
+                                id="kinhdo"
+                                name="kinhdo"
+                                placeholder="Kinh độ"
+                            />
+                        </div>
+                    </div>
+                </div>
+               
+                <div class="form-group">
+                    <label>Đường</label>
+                    <select name="duong[]" id="ten_duong" class="custom-select col-12">
+                        
+                        <option value="">Chọn đường</option>
+
+                    </select>
+                </div>
+                   
+                <div class="form-group">
+                    <label>Phường/Xã</label>
+                    <select name="phuongxa[]" id="ten_phuongxa" class="custom-select col-12">
+                        
+                        <option value="">Chọn phường/xã</option>
+
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Quận/Huyện</label>
+                    <select name="quanhuyen[]" id="ten_quanhuyen" class="custom-select col-12">
+                        
+                        <option value="">Chọn quận huyện</option>
+   
+                    </select>
+                </div>
+                
+                <div class="row">
+					<button type="button" id="add_sp" class="btn btn-primary "  data-toggle="modal" data-target="#exampleModal" style="
+                    margin-right: 20px;margin-left: 20px;">Lưu</button>
+                    <button type="button" id="timduong" class="btn btn-primary " >Tìm đường</button>
+                    <a href="thongke.php" class="btn btn-primary" target="_blank" style="margin-left: 20px;">Thống kê</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Thông tin bán</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form style="margin-left: 30px;">
+                    <div class="row">
+                        <p>Loại xăng dầu: </p>
+                        <div class="form-check">
+
+                            <input type="checkbox" name="type" value="1" id="exampleCheck1" />
+                            <label class="form-check-label" for="exampleCheck1">E5RON92</label>
+                            <br>
+                            <input type="checkbox" name="type" value="2" id="exampleCheck2" />
+                            <label class="form-check-label" for="exampleCheck2">RON95-III</label>
+                            <br>
+
+                            <input type="checkbox" name="type" value="3" id="exampleCheck3" />
+                            <label class="form-check-label" for="exampleCheck3">DIESEL</label>
+                            <br>
+
+                            <input type="checkbox" name="type" value="4" id="exampleCheck4" />
+                            <label class="form-check-label" for="exampleCheck4">Dầu Hỏa</label>
+                            <br>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <input type="hidden" id="id_dbl_add" value="">
+                        <div class="form-group">
+                            <label>Số lượng</label>
+                            <select name="soluong[]" id="soluong_md" class="custom-select col-12" >
+                                
+                                <option value="0">Chọn số lượng</option>
+                                
+                                <option value="100">100 Lít</option>
+                                <option value="1000">1000 Lít</option>
+                                <option value="10000">10000 Lít</option>
+                                
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" id="save_value" class="btn btn-primary">Lưu</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+<script>
+
+    var map = L.map('map').setView([ 10.128012222663713,105.52961441188978],11);
+
+    var layer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    
+    const markersLayer = new L.LayerGroup().addTo(map);
+    basLayer = {
+        'Chính': layer
+    }
+
+    var CanThoJSON_Line = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"coordinates":[[105.30159177416198,10.276752388507134],[105.28737403189979,10.262096220587594],[105.28906662026492,10.259431389830269],[105.26706297152612,10.239111318029458],[105.26141146533928,10.245185935107983],[105.25294852351743,10.238523460570505],[105.22586710968574,10.201211019611023],[105.27610998389486,10.160422799555633],[105.29729785466287,10.138808088003913],[105.30346159888643,10.142600248222578],[105.31039581113697,10.134636659923942],[105.31733002338751,10.140324957478697],[105.35286614716455,10.099678623146687],[105.35669041027148,10.081628595489235],[105.53292613877096,9.919727580324093],[105.54169408546261,9.940887219458574],[105.54520126413848,9.94002358750744],[105.55046203215409,9.952114227138026],[105.55572280016969,9.957727586254833],[105.55133882682395,9.960750124253607],[105.56273715752161,9.985792932532846],[105.56931311754107,9.983634145586876],[105.57457388555673,9.993564446936603],[105.5855338189204,9.988815210196549],[105.58290343491257,9.984065904121977],[105.61885201634863,9.945205344988437],[105.62805836037433,9.949523413456447],[105.62999755963477,9.956113283670945],[105.63283538021221,9.959432429449038],[105.63833365758313,9.958384281797478],[105.64560557281334,9.964498428960411],[105.64737921067518,9.975852969529484],[105.6583757654144,9.970961831321105],[105.6583757654144,9.966419994397867],[105.66830813743672,9.96589593221961],[105.67398377859297,9.963974363694092],[105.65855312920098,9.949998979416208],[105.67008177529863,9.939691750307631],[105.6759347802402,9.944233959132859],[105.67788578188731,9.943360462338191],[105.68019151110764,9.944408658212197],[105.67930469217731,9.947029133187286],[105.69384852263903,9.952270020075915],[105.69455797778397,9.954366351281777],[105.7030714395176,9.954191657528298],[105.7041356222345,9.958733664721649],[105.7099314450059,9.957671822187848],[105.71436553965867,9.959418736884587],[105.71844490673953,9.9683278563205],[105.72305636517888,9.9716468777942],[105.72358845653736,9.97514054809055],[105.72961882526533,9.96990002860035],[105.73440764748995,9.968851914589663],[105.73706810428217,9.970424084341857],[105.7470004763058,9.963436605189784],[105.75977066890556,9.9574971302047],[105.76331794462806,9.958021205876094],[105.77573340965733,9.954177964743934],[105.77851967754475,9.957582542256134],[105.8189586207805,9.964744835027574],[105.83084199445136,9.975575320398747],[105.83882336482651,9.978370225928785],[105.84467636976933,9.982737217798913],[105.82605317222544,10.005444630566814],[105.81399243476932,10.029547685346657],[105.78895389517618,10.06297615399825],[105.78067363571154,10.070618781723184],[105.76435616738809,10.078477087219497],[105.75194070236006,10.09017687598191],[105.73243068588715,10.099955477764624],[105.66166614586069,10.148589123968193],[105.64699032869146,10.16621644732325],[105.6249972192117,10.18664155439508],[105.61693072405797,10.21343738308974],[105.60894935368282,10.22687770214472],[105.59937170923223,10.239968375196938],[105.56389032414228,10.275044492161882],[105.54260666980758,10.292670456926615],[105.51280943762657,10.30819001747551],[105.49542778658616,10.325465146541035],[105.48691432485248,10.323720227067867],[105.48389914048852,10.31586796966613],[105.47662722525826,10.310284023001714],[105.45126420384264,10.307841015201546],[105.44753956433362,10.304874480260679],[105.44292810589428,10.306270500182436],[105.42678800135735,10.302954942768963],[105.44150919560559,10.269622929810907],[105.3955717954347,10.252170220877105],[105.33633229086985,10.234541999871112],[105.31210199079823,10.274037386131553],[105.30660371342861,10.268627222080596],[105.30128279984427,10.277004210978575]],"type":"LineString"}}]};
+    var CanThoJSON_Polygon = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{"GID_1":"VNM.12_1","GID_0":"VNM","COUNTRY":"Vietnam","NAME_1":"CầnThơ","VARNAME_1":"CanTho","NL_NAME_1":"NA","TYPE_1":"Thànhphố","ENGTYPE_1":"City","CC_1":"NA","HASC_1":"VN.CN","ISO_1":"NA"},"geometry":{"coordinates":[[[[105.5696,9.9839],[105.5744,9.9942],[105.5859,9.9891],[105.5832,9.9837],[105.6193,9.9456],[105.6288,9.9498],[105.6298,9.9562],[105.633,9.9596],[105.6382,9.9585],[105.6437,9.9625],[105.6455,9.9645],[105.6474,9.9757],[105.6526,9.9742],[105.6586,9.9711],[105.6582,9.9663],[105.668,9.9664],[105.6737,9.964],[105.6587,9.9502],[105.6705,9.9395],[105.6761,9.9445],[105.678,9.9433],[105.6802,9.9448],[105.679,9.9476],[105.694,9.9527],[105.694,9.9549],[105.7036,9.954],[105.7039,9.9586],[105.7106,9.9576],[105.7136,9.9593],[105.7184,9.9685],[105.7229,9.9718],[105.7236,9.9755],[105.7296,9.9702],[105.7348,9.969],[105.7369,9.9704],[105.748,9.9631],[105.7595,9.9579],[105.7628,9.9584],[105.7762,9.9544],[105.7784,9.9577],[105.8188,9.965],[105.8309,9.9757],[105.8387,9.9784],[105.8443,9.9828],[105.8261,10.0054],[105.8131,10.0308],[105.7889,10.0628],[105.781,10.0701],[105.7654,10.0782],[105.7519,10.09],[105.7327,10.0994],[105.709,10.1173],[105.6569,10.1513],[105.6463,10.1668],[105.6249,10.1864],[105.6165,10.2137],[105.6111,10.2236],[105.5993,10.2391],[105.5645,10.274],[105.5421,10.2927],[105.5127,10.308],[105.4954,10.3253],[105.4873,10.3239],[105.4846,10.3164],[105.4771,10.3106],[105.4514,10.308],[105.4478,10.3047],[105.4433,10.3062],[105.4267,10.303],[105.4415,10.2697],[105.3972,10.2528],[105.3362,10.2344],[105.312,10.2739],[105.3065,10.2689],[105.3013,10.277],[105.2875,10.2621],[105.2889,10.2599],[105.2671,10.2389],[105.261,10.2459],[105.2532,10.2385],[105.2257,10.201],[105.2758,10.1608],[105.2982,10.1386],[105.3033,10.1436],[105.3105,10.1348],[105.3171,10.1412],[105.3531,10.1006],[105.3568,10.0825],[105.3645,10.0734],[105.4031,10.0394],[105.5328,9.9193],[105.5421,9.9411],[105.5457,9.9401],[105.5503,9.9521],[105.556,9.9586],[105.5513,9.9606],[105.5631,9.9866],[105.5696,9.9839]]]],"type":"MultiPolygon"}}]};
+    L.geoJSON(CanThoJSON_Line).addTo(map);
+    
+    //lay vi do , kinh do
+    var vidoIp = document.querySelector("[name=vido]");
+    var kinhdoIp = document.querySelector("[name=kinhdo]");
+    map.attributionControl.setPrefix(false);
+    var markerthem = new L.marker([ 10.128012222663713,105.52961441188978],{
+            draggable: 'true'
+        });
+
+
+    var isMarkerCreated = false;
+    L.easyButton('<p>+</p>', function(btn, map) {
+        if(!isMarkerCreated){
+            isMarkerCreated =true;
+            markerthem = new L.marker([ 10.128012222663713,105.52961441188978],{
+                draggable: 'true'
+            })
+            markersLayer.addLayer(markerthem);
+
+            markerthem.on('dragend', function(event){
+                var position = markerthem.getLatLng();
+                markerthem.setLatLng(position,{
+                    draggable: 'true'
+                }).bindPopup(position).update();
+                $("#vido").val(position.lng);
+                $("#kinhdo").val(position.lat).keyup();
+            });
+            map.on('click', function(event){
+                var vido = event.latlng.lng;
+                var kinhdo = event.latlng.lat;
+                if(!markerthem){
+                    markerthem = L.marker(event.latlng).addTo(map);
+                }else{
+                    markerthem.setLatLng(event.latlng);
+                }
+                vidoIp.value= vido;
+                kinhdoIp.value=kinhdo;
+
+            });
+        }
+        else {
+            markersLayer.removeLayer(markerthem);
+            isMarkerCreated = false;
+        }
+        
+    }).addTo(map);
+
+    // Tạo object chứa các layer control
+    
+    
+   // Khai báo URL API
+const url = 'get_data.php';
+const xangdau = 'get_data_xangdau.php';
+// Khai báo biến overlays và control
+const overlays = {};
+var control;
+const overlays2 = {};
+var control2;
+// Lấy dữ liệu từ API và thêm marker cho từng địa điểm
+Promise.all([fetch(url), fetch(xangdau)])
+  .then(responses => Promise.all(responses.map(response => response.json())))
+  .then(data => {
+    // Thêm marker cho địa điểm bán lẻ
+    for (var item of data[0]) {
+      const diembanleLayers = [];
+
+      for (var diembanle of item.diembanle) {
+        const marker = L.marker([diembanle.kinhdo, diembanle.vido], {
+          icon: L.icon({
+            iconUrl: item.icon,
+            iconSize: [24, 36],
+            iconAnchor: [12, 36]
+          })
+        });
+
+        marker.bindPopup(`<h3>${diembanle.ten}</h3><p>${diembanle.diachi}</p></br><button onclick='return timduong(${diembanle.kinhdo},${diembanle.vido})'>Tìm Đường</button>`);
+
+        diembanleLayers.push(marker);
+      }
+
+      const layerGroup = L.layerGroup(diembanleLayers);
+
+      overlays[item.ten] = layerGroup;
+
+      layerGroup.addTo(map);
+      
+    }
+
+
+    // Thêm marker cho địa điểm xăng dầu
+    for (var item of data[1]) {
+      const diembanleLayers = [];
+
+      for (var diembanle of item.diembanle) {
+        const marker = L.marker([diembanle.kinhdo, diembanle.vido], {
+          icon: L.icon({
+            iconUrl: diembanle.icon,
+            iconSize: [24, 36],
+            iconAnchor: [12, 36]
+          })
+        });
+
+        marker.bindPopup("<h3>${diembanle.ten}</h3><p>${diembanle.diachi}</p>");
+
+        diembanleLayers.push(marker);
+      }
+
+      const layerGroup = L.layerGroup(diembanleLayers);
+
+      overlays2[item.ten] = layerGroup;
+
+      layerGroup;
+    }
+
+    // Thêm overlay và control cho các marker
+    control = L.control.layers(basLayer, overlays, {
+            position: 'topright'
+        }).addTo(map);
+    control2 = L.control.layers(basLayer, overlays2, {
+            position: 'bottomright'
+        }).addTo(map);
+        // var layers = control._getLayers("1");
+        // console.log(control);
+
+        // console.log(layers);
+        
+        // console.log(getmanga());
+        
+  });
+
+// Xử lý sự kiện overlayadd để bỏ check trên control2 khi người dùng check trên control1
+
+
+
+
+
+
+    //Iput combobox
+    //duong
+    const url2 = 'get_duong.php';
+    fetch(url2).then(response => response.json()).then(data => {
+        const selectElement = document.getElementById('ten_duong'); // thay 'select-element' bằng ID của select element trong HTML
+        data.forEach(item => {
+            const optionElement = document.createElement('option');
+            optionElement.value = item.id; // thay 'value' bằng thuộc tính của item chứa giá trị của option
+            optionElement.textContent = item.ten; // thay 'text' bằng thuộc tính của item chứa nội dung của option
+            selectElement.appendChild(optionElement);
+        });
+    });
+    //congty
+    const url3 = 'get_congty.php';
+    fetch(url3).then(response => response.json()).then(data => {
+        const selectElement = document.getElementById('ten_congty'); // thay 'select-element' bằng ID của select element trong HTML
+        data.forEach(item => {
+            const optionElement = document.createElement('option');
+            optionElement.value = item.id; // thay 'value' bằng thuộc tính của item chứa giá trị của option
+            optionElement.textContent = item.ten; // thay 'text' bằng thuộc tính của item chứa nội dung của option
+            selectElement.appendChild(optionElement);
+        });
+    });
+    //phuongxa
+    const url4 = 'get_phuongxa.php';
+    fetch(url4).then(response => response.json()).then(data => {
+        const selectElement = document.getElementById('ten_phuongxa'); // thay 'select-element' bằng ID của select element trong HTML
+        data.forEach(item => {
+            const optionElement = document.createElement('option');
+            optionElement.value = item.id; // thay 'value' bằng thuộc tính của item chứa giá trị của option
+            optionElement.textContent = item.ten; // thay 'text' bằng thuộc tính của item chứa nội dung của option
+            selectElement.appendChild(optionElement);
+        });
+    });
+    //quanhuyen
+    const url5 = 'get_quanhuyen.php';
+    fetch(url5).then(response => response.json()).then(data => {
+        const selectElement = document.getElementById('ten_quanhuyen'); // thay 'select-element' bằng ID của select element trong HTML
+        data.forEach(item => {
+            const optionElement = document.createElement('option');
+            optionElement.value = item.id; // thay 'value' bằng thuộc tính của item chứa giá trị của option
+            optionElement.textContent = item.ten; // thay 'text' bằng thuộc tính của item chứa nội dung của option
+            selectElement.appendChild(optionElement);
+        });
+    });
+   
+    
+
+
+
+
+
+</script>
+
+<script>
+    $('#add_sp').click(function(){
+        var ten_dbl = document.getElementById('ten_dbl').value;
+        var ten_congty = document.getElementById('ten_congty').value;
+        var sdt = document.getElementById('sdt').value;
+        var diachi = document.getElementById('diachi').value;
+        var vido = document.getElementById('vido').value;
+        var kinhdo = document.getElementById('kinhdo').value;
+        var ten_duong = document.getElementById('ten_duong').value;
+        var ten_phuongxa = document.getElementById('ten_phuongxa').value;
+        var ten_quanhuyen = document.getElementById('ten_quanhuyen').value;
+
+        
+        var formData = new FormData();
+        formData.append('ten_dbl', ten_dbl);
+        formData.append('ten_congty', ten_congty);
+        formData.append('sdt', sdt);
+        formData.append('diachi', diachi);
+        formData.append('vido', vido);
+        formData.append('kinhdo', kinhdo);
+        formData.append('ten_duong', ten_duong);
+        formData.append('ten_phuongxa', ten_phuongxa);
+        formData.append('ten_quanhuyen', ten_quanhuyen);
+        $.ajax({
+            type: 'POST',
+            url: 'ajax_add.php',
+            datatype: "json",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                var data = $.parseJSON(data);
+                document.getElementById('id_dbl_add').value=data.dbl_id;
+                console.log(data.dbl_id);
+                
+            },
+        });
+    });
+
+    $('#save_value').click(function(){
+        var val = [];
+        var soluong = document.getElementById('soluong_md').value;
+        var id = document.getElementById('id_dbl_add').value;
+        $('input:checkbox[name=type]:checked').each(function(i){
+          val[i] = $(this).val() ;
+        });
+        ten={id: val};
+        // console.log(val);
+        var formData = new FormData();
+        formData.append('id', id);
+        formData.append('ten', ten.id);
+        formData.append('soluong', soluong);
+        $.ajax({
+            type: 'POST',
+            url: 'ajax_save.php',
+            datatype: "json",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                // var data = $.parseJSON(data);
+                alert('Thêm sản phẩm thành công!');
+                // console.log(data);
+            },
+          });
+    });
+
+
+var lc = L.control.locate().addTo(map);
+
+// Hủy đối tượng routingControl khi tắt đối tượng L.control.locate()
+map.on('locationerror', function(e) {
+    if (routingControl) {
+        routingControl.remove();
+    }
+});
+
+$('#timduong').click(function(){
+    console.log(getmanga());
+    var a =getmanga();
+    var userMarker;
+    var nearestMarker;
+    // console.log(control);
+    map.once('locationfound', function(e) {
+        var userLatLng = e.latlng;
+        // userMarker.setLatLng(userLatLng);
+        let shortestDistance = Infinity;
+        console.log(e);
+
+        map.eachLayer(function(layer) {
+            for(const i in a){
+                if(layer._leaflet_id == a[i]){
+                    // console.log(layer);
+                    var distance = userLatLng.distanceTo(layer.getLatLng());
+                    if (distance < shortestDistance) {
+                        shortestDistance = distance;
+                        nearestMarker = layer;
+                    }
+                }
+
+            }
+            
+
+        })
+        console.log(nearestMarker   );
+        routingControl = L.Routing.control({
+          waypoints: [
+            userLatLng,
+            nearestMarker.getLatLng()
+          ],
+          geocoder: L.Control.Geocoder.nominatim(),
+          routeWhileDragging: true
+        }).addTo(map);
+        return;
+    });
+        
+});
+
+
+map.on("overlayremove", function(event) {
+
+        event.layer._map =null;
+        getmanga();
+
+});
+
+
+function getmanga(){
+    var a= [];
+    const numLayers = Object.keys(control._layers).length;
+        const numLayers2 = Object.keys(control2._layers).length;
+        // console.log(numLayers);
+        // console.log(control._layers[i].layer._map == null);
+        for (var i = 1;i<numLayers;i++){
+            if(control._layers[i].layer._map != null){
+                for(const layerId in control._layers[i].layer._layers){
+                    a.push(layerId);
+                }
+            }
+        }
+        for (var i = 1;i<numLayers2;i++){
+            if(control2._layers[i].layer._map != null){
+                for(const layerId in control2._layers[i].layer._layers){
+                    a.push(layerId);
+                }
+            }
+        }
+    return a;
+}
+
+map.on("overlayadd", function(event) {
+    console.log(event.layer._map == null);
+   
+
+    getmanga();
+
+});
+</script>
+
+<script>
+
+let routingControl = null;
+
+function timduong(kinhdohm, vidohm) {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      const currentLatlng = L.latLng(position.coords.latitude, position.coords.longitude);
+      
+      // Nếu chưa có routingControl, tạo mới và thêm vào bản đồ
+      if (!routingControl) {
+        routingControl = L.Routing.control({
+          waypoints: [
+            currentLatlng,
+            L.latLng(kinhdohm, vidohm)
+          ],
+          geocoder: L.Control.Geocoder.nominatim(),
+          routeWhileDragging: true
+        }).addTo(map);
+      } else {
+        // Nếu đã có routingControl, thêm điểm đến mới vào cuối mảng waypoints
+        routingControl.spliceWaypoints(routingControl.getWaypoints().length - 1, 1,  L.latLng(kinhdohm, vidohm));
+        
+        // Tính toán tuyến đường mới
+        routingControl.route();
+      }
+    },
+    function(error) {
+      console.error(error);
+    });
+  } else {
+    console.error("Geolocation is not supported by this browser.");
+  }
+}
+
+// Lặp qua tất cả các layer trên bản đồ
+
+</script>
